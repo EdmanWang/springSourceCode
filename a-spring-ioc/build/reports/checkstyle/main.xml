@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.18">
+<file name="D:\Java\code\springSourceCode\spring-framework-5.1.x\a-spring-ioc\src\main\java\com\wgx\bean\Cat.java">
+<error line="1" severity="error" message="header.missing" source="io.spring.javaformat.checkstyle.check.SpringHeaderCheck"/>
+<error line="5" severity="error" message="缺少 Javadoc 。" source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck"/>
+</file>
+<file name="D:\Java\code\springSourceCode\spring-framework-5.1.x\a-spring-ioc\src\main\java\com\wgx\bean\Dog.java">
+<error line="1" severity="error" message="header.missing" source="io.spring.javaformat.checkstyle.check.SpringHeaderCheck"/>
+<error line="5" severity="error" message="缺少 Javadoc 。" source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck"/>
+</file>
+<file name="D:\Java\code\springSourceCode\spring-framework-5.1.x\a-spring-ioc\src\main\java\com\wgx\config\AppConfig.java">
+<error line="1" severity="error" message="header.missing" source="io.spring.javaformat.checkstyle.check.SpringHeaderCheck"/>
+<error line="6" severity="error" message="缺少 Javadoc 。" source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck"/>
+</file>
+<file name="D:\Java\code\springSourceCode\spring-framework-5.1.x\a-spring-ioc\src\main\java\com\wgx\test\IocTest.java">
+<error line="1" severity="error" message="header.mismatch" source="io.spring.javaformat.checkstyle.check.SpringHeaderCheck"/>
+<error line="5" severity="error" message="&apos;org.springframework.context.annotation.AnnotationConfigApplicationContext&apos; 应与之前的导入语句通过空行隔开。" source="com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck"/>
+<error line="7" severity="error" message="缺少 Javadoc 。" source="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck"/>
+<error line="7" column="1" severity="error" message="工具类应隐藏 public 构造器。" source="com.puppycrawl.tools.checkstyle.checks.design.HideUtilityClassConstructorCheck"/>
+</file>
+</checkstyle>
