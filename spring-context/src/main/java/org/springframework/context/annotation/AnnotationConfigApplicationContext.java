@@ -63,7 +63,21 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/**
+		 * @edmanwang
+		 * 向容器中添加相关组件
+		 * 例如：
+		 *     1：用于解析@autowire的注解
+		 *     2：用于解析@configruation的注解
+		 *     3：用于解析监听器的注解
+		 *     .......
+		 *     一共有6个
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		/**
+		 * @edmanwang
+		 * 为默认包扫描做准备，添加对应的包扫描过滤器
+		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -84,8 +98,22 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/**
+		 * @edmanwang
+		 * 加载相关组件，添加包扫描默认的包扫描过滤器
+		 */
 		this();
+
+		/**
+		 * @edmanwang
+		 * 向容器中添加项目的主启动类
+		 */
 		register(componentClasses);
+
+		/**
+		 * @edmanwang
+		 *     非常非常非常重要的一个方法，重要的事说三遍
+		 */
 		refresh();
 	}
 

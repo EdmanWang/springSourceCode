@@ -58,11 +58,21 @@ final class PostProcessorRegistrationDelegate {
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		Set<String> processedBeans = new HashSet<>();
 
+		/**
+		 * @edmanwang
+		 * 这里的beanFactory 是BeanDefinitionRegistry 的一个实现
+		 * 所以会走这里的if
+		 */
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
+			/**
+			 * @edmanwang
+			 * 容器初始化的时候beanFactory中是没有后置处理器的
+			 * 也就是beanFactoryPostProcessors.size == 0
+			 */
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
@@ -82,6 +92,12 @@ final class PostProcessorRegistrationDelegate {
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			/**
+			 * @edmanwang
+			 * 从容器中拿到以这个【BeanDefinitionRegistryPostProcessor】类型的后置处理器
+			 * 这个地方会拿到ConfigurationClassPostProcessor ，因为这个bean定义在前面已经注册到容器中了
+			 *    注意：ConfigurationClassPostProcessor 是实现了 BeanDefinitionRegistryPostProcessor
+			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
@@ -92,6 +108,12 @@ final class PostProcessorRegistrationDelegate {
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
+			/**
+			 * @edmanwang
+			 * 后置处理器处理相关的bean定义  十分重要的一个方法
+			 * 当前的注册处理器是ConfigurationClassPostProcessor
+			 * register 指的是 beanFactory
+			 */
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
@@ -272,6 +294,11 @@ final class PostProcessorRegistrationDelegate {
 			Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry) {
 
 		for (BeanDefinitionRegistryPostProcessor postProcessor : postProcessors) {
+			/**
+			 * @edmanwang
+			 * 后置处理器工作
+			 * postProcessors.size == 1
+			 */
 			postProcessor.postProcessBeanDefinitionRegistry(registry);
 		}
 	}

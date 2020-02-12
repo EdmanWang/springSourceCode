@@ -162,6 +162,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
 
+		/**
+		 * @edmanwang
+		 * 如果需要加载自己定义的包扫描过滤器的话，那么useDefaultFilters必须设置为false
+		 */
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
@@ -283,6 +287,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				/**
+				 * @edmanwang
+				 * 将扫描到的bean添加到容器中
+				 */
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =

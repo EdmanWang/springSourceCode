@@ -160,9 +160,18 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
+		/**
+		 * @edmanwang
+		 * configCandidates.size == 1
+		 * 也就是说只有一个BeanDefinition 即是：项目的主配置类
+		 */
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				/**
+				 * @edmanwang
+				 * 判断是否是注解版的bean定义器
+				 */
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
@@ -214,14 +223,28 @@ class ConfigurationClassParser {
 	}
 
 
+	/**
+	 * @edmanwang
+	 * configClass --- > 主配置类
+	 * @param configClass
+	 * @throws IOException
+	 */
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
 
+		/**
+		 * @edmanwang
+		 * 这里的this.configurationClasses 是一个map集合，用于存放需要解析的bean定义器
+		 */
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
 			if (configClass.isImported()) {
+				/**
+				 * @edmanwang
+				 * 如果解析的是@import注解直接返回了
+				 */
 				if (existingClass.isImported()) {
 					existingClass.mergeImportedBy(configClass);
 				}
@@ -239,10 +262,24 @@ class ConfigurationClassParser {
 		// Recursively process the configuration class and its superclass hierarchy.
 		SourceClass sourceClass = asSourceClass(configClass);
 		do {
+			/**
+			 * @edmanwang
+			 * 实际干活的类
+			 * 这里面其实做了很多事，解析@configuration @import @bean 等等
+			 * 以及做了对扫描到了组件上面再次去判断是否又以上【@configuration @import @bean 等等】 的注解
+			 *
+			 */
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
 
+		/**
+		 * @edmanwang
+		 * 用于存储相关的bean定义器
+		 * 其中包括已经被@configuration + @controller / @service / @respository 注解的组件
+		 * 再加上被@import扫描到的组件
+		 * 再加上被@configrution扫描到的组件【但是这个组件被包装了一下，是一个拥有beanMethod 属性bean定义器】
+		 */
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -277,12 +314,23 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		/**
+		 * @edmanwang
+		 * 处理包扫描：重点
+		 */
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+		/**
+		 * 解析@ComponentScans 和 @ComponentScan 注解
+		 */
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				/**
+				 * @edmanwang
+				 * 实际上完成包扫描注解解析的方法
+				 */
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
@@ -291,6 +339,12 @@ class ConfigurationClassParser {
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					/**
+					 * @edmanwang
+					 *  这里再做一次解析的原因是因为
+					 *  用@controller修饰的组件上面还有@ComponentScans 或者 @ComponentScan 或者 @import 等等.... 注解
+					 *  按照编码习惯是不会在@controller修饰的组件上再标其他的扫描bean定义的组件
+					 */
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
@@ -299,6 +353,9 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
+		/**
+		 * 解析@import注解
+		 */
 		processImports(configClass, sourceClass, getImports(sourceClass), true);
 
 		// Process any @ImportResource annotations
@@ -553,6 +610,10 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					/**
+					 * @edmanwang
+					 * 解析@ImportSelector注解
+					 */
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -563,11 +624,19 @@ class ConfigurationClassParser {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							/**
+							 * @edmanwang
+							 * 调用selectImports方法
+							 */
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
+					/**
+					 * @edmanwang
+					 * 解析@ImportBeanDefinitionRegistrar注解
+					 */
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -579,8 +648,16 @@ class ConfigurationClassParser {
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
+						/**
+						 * @edmanwang
+						 * 解析@ImportB注解
+						 */
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
+						/**
+						 * @edmanwang
+						 * 这个地方只是记录了一下@import注解中添加的需要解析的类
+						 */
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
 						processConfigurationClass(candidate.asConfigClass(configClass));

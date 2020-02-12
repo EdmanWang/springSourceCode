@@ -107,6 +107,9 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Create a new GenericApplicationContext.
 	 * @see #registerBeanDefinition
 	 * @see #refresh
+	 *
+	 * edmanwang
+	 * 默认的bean工程对象是DefaultListableBeanFactory 的实例
 	 */
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();

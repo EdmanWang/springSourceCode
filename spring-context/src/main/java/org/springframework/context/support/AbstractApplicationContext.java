@@ -528,6 +528,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
+				/**
+				 * @edmanwang
+				 *    这是一个非常非常非常核心的方法........
+				 * 作用：用于调用beanFactory的后置处理器 库
+				 * 1：用于解析包扫描，向容器中添加已@componentScan + @component / @service / @respository 的注解类
+				 * 2：用于解析@import注解已经import注解的相关变种  【@importSelector, @importBeanDefinitionRegister....】
+				 * 3: 用于解析@bean注解
+				 *    以上三种都是向容器中添加相关的bean定义
+				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
@@ -537,12 +546,24 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/**
+				 * @edmanwang
+				 * 为容器初始化事件多播器
+				 */
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				/**
+				 * @edmanwang
+				 * springboot 用此方法启动tomcat,默认是一个空的实现
+				 */
 				onRefresh();
 
 				// Check for listener beans and register them.
+				/**
+				 * @edmanwang
+				 * 为容器注册监听器
+				 */
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
@@ -702,6 +723,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		/**
+		 * @edmanwang
+		 * invokeBeanFactoryPostProcessors 重点方法
+		 */
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
@@ -760,6 +785,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	protected void initApplicationEventMulticaster() {
+		/**
+		 * @edmanwang
+		 * 第一次走进来的时候，容器并没有applicationEventMulticaster这个bean
+		 * 所以会走else
+		 */
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
@@ -769,6 +799,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
+			/**
+			 * @edmanwang
+			 * 向容器中添加applicationEventMulticaster 的bean定义器
+			 */
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {
@@ -818,21 +852,36 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Add beans that implement ApplicationListener as listeners.
 	 * Doesn't affect other listeners, which can be added without being beans.
+	 *
+	 * @edmanwang
+	 * 此处用了观察者模式
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
+		/**
+		 * @edmanwang
+		 * 向多播器中添加容器自己的监听器
+		 */
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		/**
+		 * @edmanwang
+		 * 向多播器中添加自己定义的监听器
+		 */
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
 		}
 
 		// Publish early application events now that we finally have a multicaster...
+		/**
+		 * @edmanwang
+		 * 多播器发布早期事件
+		 */
 		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
 		this.earlyApplicationEvents = null;
 		if (earlyEventsToProcess != null) {
