@@ -567,6 +567,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				/**
+				 * @edmanwang
+				 * 完成bean工厂的初始化
+				 * 这里不仅解决了bean的创建
+				 * 而且springIOC使用多级缓存解决了对象之间的循环依赖问题
+				 */
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -894,6 +900,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Finish the initialization of this context's bean factory,
 	 * initializing all remaining singleton beans.
+	 *
+	 * @edmanwang
+	 * 完成这个上下文的bean工厂的初始化
+	 * 初始化所有剩余的单例bean。
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
 		// Initialize conversion service for this context.
@@ -920,9 +930,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.setTempClassLoader(null);
 
 		// Allow for caching all bean definition metadata, not expecting further changes.
+		/**
+		 * @edmanwang
+		 * springIOC容器到这里为止不再允许我们再去修改bean工厂中的bean定义
+		 */
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		/**
+		 * @edmanwang
+		 * 实例化所有剩余的(非惰性初始化)单例。
+		 */
 		beanFactory.preInstantiateSingletons();
 	}
 

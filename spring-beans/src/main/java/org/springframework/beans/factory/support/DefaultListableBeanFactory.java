@@ -810,6 +810,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	/**
+	 * @edmanwang
+	 * 预处理实例化单例bean
+	 */
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isTraceEnabled()) {
@@ -818,12 +822,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+		/**
+		 * @edmanwang
+		 * 得到在前面经过invokeBeanFactoryPostProcessors(beanFactory);函数处理
+		 * 扫描得到的bean定义器，其中包含包扫描得到的，以及@import @bean .... 等一系列的beanDefinition
+		 */
 		List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
 
 		// Trigger initialization of all non-lazy singleton beans...
 		for (String beanName : beanNames) {
+			/**
+			 * @edmanwang
+			 * 将每一个beanName包装成一个RootBeanDefinition对象
+			 */
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				/**
+				 * @edmanwang
+				 * 判断当前beanName是否存在bean工厂中
+				 * 很明显：第一次创建的时候，是不存在bean工厂中的
+				 * 走 else流程
+				 */
 				if (isFactoryBean(beanName)) {
 					Object bean = getBean(FACTORY_BEAN_PREFIX + beanName);
 					if (bean instanceof FactoryBean) {
@@ -844,6 +863,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 				else {
+					/**
+					 * @edmanwang
+					 * 实现bean的创建
+					 */
 					getBean(beanName);
 				}
 			}
