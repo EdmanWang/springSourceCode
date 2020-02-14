@@ -171,7 +171,8 @@ public abstract class AnnotationConfigUtils {
 		/**
 		 * @edmanwang
 		 * 加入配置版的后置处理器，
-		 * 用于解析加上了 @configuration的配置类
+		 * 用于解析加上了 @configuration的配置类 的后置处理器
+		 * ConfigurationClassPostProcessor
 		 */
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
@@ -181,7 +182,8 @@ public abstract class AnnotationConfigUtils {
 
 		/**
 		 * @edmanwang
-		 * 加入用于解析@autowire的解析类
+		 * 加入用于解析@autowire的解析类 的后置处理器
+		 * AutowiredAnnotationBeanPostProcessor
 		 */
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);

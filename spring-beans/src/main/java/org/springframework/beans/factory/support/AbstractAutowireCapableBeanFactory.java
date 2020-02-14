@@ -1240,6 +1240,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		 * 有参构造器创建bean的实例
 		 * 这里在创建bean的时候，就算发现了有循环依赖，spring也是无法解决的。
 		 * 因为在缓存中没有被依赖的bean对象的引用
+		 *
+		 * 如果是有参构造器方式进行创建bean实例的话
+		 * mbd.hasConstructorArgumentValues() == true
+		 * 那么就会进入下面的if判断内
+		 *
+		 * 在下面的方法
+		 * autowireConstructor(beanName, mbd, ctors, args);
+		 * 会去解析参数
+		 * 如果发现是非简单对象需要创建的话，那么会再次创建参数bean对象
+		 * 也就是说，本身对象还没创建出来【也就表示本身对象没有放入缓存中】
+		 * 如果这个时候，参数对象的创建也是需要前面的对象【即：存在循环引用】
+		 * 这个时候去缓存拿被依赖对象的时候，是拿不到的。所以构造器方式是无法解决勋魂依赖的
+		 *
 		 */
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
@@ -1489,6 +1502,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
 			}
+			/**
+			 * @edmanwang
+			 * 如果是是采用@autowire的方式去注入对象的属性的时候
+			 * 这个地方会采用bean的 一个后置处理器 【autowireAnnotationBeanPostProcessor】去处理
+			 * 如果发现又循环依赖的话，这里也会解决
+			 */
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
@@ -1497,6 +1516,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						if (filteredPds == null) {
 							filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 						}
+						/**
+						 * @edmanwang
+						 * 采用@autowire的方式去注入对象的属性的时候就在这里解决的
+						 */
 						pvsToUse = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
 						if (pvsToUse == null) {
 							return;

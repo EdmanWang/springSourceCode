@@ -339,6 +339,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			parser.parse(candidates);
 			parser.validate();
 
+			/**
+			 * @edmanwang
+			 * 这里主要是拿到前面通过@import和@bean 扫描到ConfigurationClasses 【map】 这个数据结构中的数据信息
+			 */
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);
 

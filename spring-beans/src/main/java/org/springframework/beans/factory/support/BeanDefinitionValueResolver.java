@@ -300,6 +300,12 @@ class BeanDefinitionValueResolver {
 				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
 			}
 			else {
+				/**
+				 * @edmanwang
+				 * 拿引用的参数beanName再去获取一次bean对象
+				 * 也就是这个地方会出现循环依赖问题
+				 * 因为缓存中拿不到被依赖对象
+				 */
 				bean = this.beanFactory.getBean(refName);
 				this.beanFactory.registerDependentBean(refName, this.beanName);
 			}

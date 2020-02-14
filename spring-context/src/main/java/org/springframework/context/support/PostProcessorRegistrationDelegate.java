@@ -72,6 +72,8 @@ final class PostProcessorRegistrationDelegate {
 			 * @edmanwang
 			 * 容器初始化的时候beanFactory中是没有后置处理器的
 			 * 也就是beanFactoryPostProcessors.size == 0
+			 * 所谓的bean工厂的后置处理器，其实也是一个bean
+			 * 只是置处理器可以起到增强bean的作用
 			 */
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
@@ -106,7 +108,16 @@ final class PostProcessorRegistrationDelegate {
 					processedBeans.add(ppName);
 				}
 			}
+
+			/**
+			 * @edmanwang
+			 * 对后置处理器进行排序
+			 */
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			/**
+			 * @edmanwang
+			 * 将currentRegistryProcessors 中的元素添加到  registryProcessors 中去
+			 */
 			registryProcessors.addAll(currentRegistryProcessors);
 			/**
 			 * @edmanwang
