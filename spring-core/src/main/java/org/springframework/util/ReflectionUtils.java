@@ -401,12 +401,21 @@ public abstract class ReflectionUtils {
 	 */
 	public static void doWithMethods(Class<?> clazz, MethodCallback mc, @Nullable MethodFilter mf) {
 		// Keep backing up the inheritance hierarchy.
+		/**
+		 * @edmanwang
+		 * 得到全部声明的方法
+		 * 去除pointCut修饰的方法
+		 */
 		Method[] methods = getDeclaredMethods(clazz);
 		for (Method method : methods) {
 			if (mf != null && !mf.matches(method)) {
 				continue;
 			}
 			try {
+				/**
+				 * @edmanwang
+				 * 去除了pointCut修饰的方法
+				 */
 				mc.doWith(method);
 			}
 			catch (IllegalAccessException ex) {

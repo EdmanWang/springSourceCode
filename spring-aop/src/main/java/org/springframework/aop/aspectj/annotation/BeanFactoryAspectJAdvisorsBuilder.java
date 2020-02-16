@@ -83,11 +83,24 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	public List<Advisor> buildAspectJAdvisors() {
 		List<String> aspectNames = this.aspectBeanNames;
 
+		/**
+		 * @edmanwang
+		 * 第一次进来肯定aspectNames == null 的
+		 *
+		 * 但是当第二次进来，需要加载容器中的切面信息的时候
+		 * 这个时候，aspectNames已经不等于 null 了
+		 * 所以这里不会再次去加载切面信息
+		 */
 		if (aspectNames == null) {
 			synchronized (this) {
 				aspectNames = this.aspectBeanNames;
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
+					/**
+					 * @edmanwang
+					 * 从容器中得到继承【Object】的组件
+					 * 也就是说得到容器中全部的组件
+					 */
 					aspectNames = new ArrayList<>();
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
@@ -97,18 +110,38 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						}
 						// We must be careful not to instantiate beans eagerly as in this case they
 						// would be cached by the Spring container but would not have been weaved.
+						/**
+						 * @edmanwang
+						 * 通过名称找到对应的类型
+						 */
 						Class<?> beanType = this.beanFactory.getType(beanName);
 						if (beanType == null) {
 							continue;
 						}
+						/**
+						 * @edmanwang
+						 * 判断该类型是否被aspect修饰过
+						 */
 						if (this.advisorFactory.isAspect(beanType)) {
+							/**
+							 * @edmanwang
+							 * 逐个添加切面名
+							 */
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								/**
+								 * @edmanwang
+								 * 得到增强器
+								 */
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
 								if (this.beanFactory.isSingleton(beanName)) {
+									/**
+									 * @edmanwang
+									 * 将切面缓存数据信息，放入缓存【advisorsCache】
+									 */
 									this.advisorsCache.put(beanName, classAdvisors);
 								}
 								else {

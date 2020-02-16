@@ -514,6 +514,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 * @edmanwang
 			 * 给beanpostprocessor一个机会来返回代理而不是目标bean实例
 			 * 此处用于aop
+			 *
+			 * 注意：如果是使用了【 @EnableAspectJAutoProxy 】这个注解
+			 *    那么只有当这个【AnnotationAwareAspectJAutoProxyCreator】被实例化之后
+			 *    任意的一个bean实例化的过程中才会去判断容器中的切面是否已经被加载过
+			 *    如果没有被加载过，则得到全部的bean定义，逐个去判断是否有被@aspect修饰过的bean
+			 *    如果有的话，就加入切面缓存
+			 *
+			 *    同时还有一个点需要注意
+			 *    容器加载切面bean信息是发生在bean初始化之前也就是说在doCreateBean之前
+			 *
+			 *    其实下面这个方法就是一个调用bean的后置处理器
 			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -560,6 +571,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #instantiateBean
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
+	 *
+	 * @edmanwang
+	 * 初始化和实例化是两个不同的过程
+	 * 1：在spring中实例化是发生在初始化之前的
+	 * 2：实例化只是将对象bean对创建出来了，并没有给bean的属性赋值
+	 * 3：初始化发生在实例化之后，他
 	 */
 	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
 			throws BeanCreationException {
@@ -634,12 +651,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 *   拿不到被依赖对象的引用。所以无法解决对象的玄幻引用问题。
 			 * 多例模式下的bean更加解决不了
 			 *   原因是多例下的bean对象根本就不会放入到缓存中去
+			 *
+			 *
+			 * 注意：对象实例化的后置处理器在里面执行
 			 */
 			populateBean(beanName, mbd, instanceWrapper);
 			/**
 			 * @edmanwang
 			 * 这里做了bean的增强，如果有些bean是implement xxxAwre 或者 initializeBean
 			 * 这里就会调用被复写的方法
+			 *
+			 * 这里做的事初始化bean
 			 */
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
@@ -1144,8 +1166,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Class<?> targetType = determineTargetType(beanName, mbd);
 				if (targetType != null) {
+					/**
+					 * @edmanwang
+					 * 执行bean的后置处理器
+					 * 这里的后置处理器指的是bean初始化之前的处理器
+					 */
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {
+						/**
+						 * @edmanwang
+						 * 这里也是执行bean的后置处理器
+						 * 但是这个地方是处理bean初始化之后的处理器
+						 */
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
 				}
@@ -1168,8 +1200,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Nullable
 	protected Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
+		/**
+		 * @edmanwang
+		 * 拿到全部bean的后置处理器
+		 * 执行bea初始化之前的处理函数
+		 */
 		for (BeanPostProcessor bp : getBeanPostProcessors()) {
 			if (bp instanceof InstantiationAwareBeanPostProcessor) {
+				/**
+				 * @edmanwang
+				 * 此处有很多的hean后置处理器都是实现了【InstantiationAwareBeanPostProcessor】这个接口
+				 * 但是很大一部分都是空的实现，或者直接返回null
+				 */
 				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
 				Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
 				if (result != null) {
@@ -1459,6 +1501,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
+
+		/**
+		 * @edmanwang
+		 * 调用bean的后置处理器
+		 * 此处调用的是实例化之后的bean的后置处理器
+		 * 也就是说此处只是吧bean给实例化了，但是还没有给bean的属性赋值
+		 */
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
@@ -1877,14 +1926,31 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
+			/**
+			 * @edmanwang
+			 * 如果该bean实现了xxxawre 接口的话，则调用对应的方法
+			 */
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
+
+		/**
+		 * @edmanwang
+		 * 这里执行的是
+		 * 初始化bean之前的后置处理器
+		 *
+		 * 例如执行：@PostConstruct修饰的方法
+		 */
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
+		/**
+		 * @edmanwang
+		 * 初始化bean
+		 * 如果bean实现了InitializingBean则会调用afterPropertiesSet()
+		 */
 		try {
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
@@ -1893,6 +1959,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(mbd != null ? mbd.getResourceDescription() : null),
 					beanName, "Invocation of init method failed", ex);
 		}
+		/**
+		 * @edmanwang
+		 * 这里是调用bean初始化之后的后置处理器
+		 * 例如：如果该bean需要被代理的话，这里地方会生成代理对象
+		 */
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
@@ -1900,6 +1971,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return wrappedBean;
 	}
 
+	/**
+	 * @edmanwang
+	 *
+	 * 执行重写的方法
+	 * @param beanName
+	 * @param bean
+	 */
 	private void invokeAwareMethods(final String beanName, final Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof BeanNameAware) {
@@ -1949,6 +2027,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
+				/**
+				 * @edmanwang
+				 * 执行重写的afterPropertiesSet();方法
+				 */
 				((InitializingBean) bean).afterPropertiesSet();
 			}
 		}

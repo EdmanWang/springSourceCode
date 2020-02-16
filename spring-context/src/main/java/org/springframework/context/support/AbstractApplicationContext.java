@@ -540,6 +540,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
+				/**
+				 * @edmanwang
+				 * 注册拦截bean创建的bean处理器。
+				 * 也就是说注册所有拦截bean创建前后的bean后置处理器
+				 */
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
@@ -569,9 +574,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Instantiate all remaining (non-lazy-init) singletons.
 				/**
 				 * @edmanwang
-				 * 完成bean工厂的初始化
-				 * 这里不仅解决了bean的创建
-				 * 而且springIOC使用多级缓存解决了对象之间的循环依赖问题
+				 * 1:完成bean工厂的初始化
+				 *   这里不仅解决了bean的创建
+				 *   而且springIOC使用多级缓存解决了对象之间的循环依赖问题
+				 *
+				 * 2：加载切面信息到容器缓存中去，方便创建代理对象的时候从缓存中拿到增强器
+				 *    加载切面信息到容器中，这其中就是利用到了bean的后置处理器
 				 */
 				finishBeanFactoryInitialization(beanFactory);
 
@@ -927,6 +935,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Stop using the temporary ClassLoader for type matching.
+		/**
+		 * @edmanwang
+		 * 停止使用临时类加载器进行类型匹配
+		 */
 		beanFactory.setTempClassLoader(null);
 
 		// Allow for caching all bean definition metadata, not expecting further changes.

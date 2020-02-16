@@ -248,6 +248,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
+			/**
+			 * @edmanwang
+			 * isInfrastructureClass(beanClass) 这个地方是判断基础bean定义
+			 * shouldSkip(beanClass, beanName) 这个地方是判断这个beanName 是否应该跳过容器的切面检查
+			 *
+			 * 走完shouldSkip函数之后容器中全部的切面增强器逗已经放入缓存中
+			 */
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
@@ -296,6 +303,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				/**
+				 * @edmanwang
+				 * 判断是否需要包装成代理对象
+				 */
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -344,9 +355,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 
 		// Create proxy if we have advice.
+		/**
+		 * @edmanwang
+		 * 判断这个对象是否有必要去创建代理对象
+		 */
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			/**
+			 * @edmanwang
+			 * 创建代理对象
+			 */
 			Object proxy = createProxy(
 					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -468,6 +487,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			proxyFactory.setPreFiltered(true);
 		}
 
+		/**
+		 * @edmanwang
+		 * 创建代理对象
+		 */
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 
