@@ -743,7 +743,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		 *
 		 * getBeanFactoryPostProcessors()
 		 *   得到beanFactory的后置处理器
-		 *   容器初始化得失嘿嘿，getBeanFactoryPostProcessors() 是没有值的
+		 *   容器初始化之前，getBeanFactoryPostProcessors() 是没有值的
 		 */
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 

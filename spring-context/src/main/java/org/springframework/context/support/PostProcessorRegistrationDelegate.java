@@ -69,6 +69,7 @@ final class PostProcessorRegistrationDelegate {
 		 * DefaultListableBeanFactory 是 BeanDefinitionRegistry 的一个实现
 		 */
 		if (beanFactory instanceof BeanDefinitionRegistry) {
+			// 将beanFactory包装成一个registry
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
@@ -100,6 +101,7 @@ final class PostProcessorRegistrationDelegate {
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
 			/**
+			 * 首先，调用实现priorityor的beandefinitionregistrypostprocessor。
 			 * @edmanwang
 			 * 从容器中拿到以这个【BeanDefinitionRegistryPostProcessor】类型的后置处理器
 			 * 这个地方会拿到ConfigurationClassPostProcessor ，因为这个bean定义在前面已经注册到容器中了
