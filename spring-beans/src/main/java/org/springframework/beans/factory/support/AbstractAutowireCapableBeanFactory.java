@@ -525,6 +525,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 *    容器加载切面bean信息是发生在bean初始化之前也就是说在doCreateBean之前
 			 *
 			 *    其实下面这个方法就是一个调用bean的后置处理器
+			 *
+			 *
 			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -1169,7 +1171,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					/**
 					 * @edmanwang
 					 * 执行bean的后置处理器
-					 * 这里的后置处理器指的是bean初始化之前的处理器
+					 * 这里的后置处理器指的是bean实例化之前的处理器
 					 */
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {

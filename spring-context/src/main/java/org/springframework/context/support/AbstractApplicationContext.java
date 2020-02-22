@@ -740,6 +740,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		/**
 		 * @edmanwang
 		 * invokeBeanFactoryPostProcessors 重点方法
+		 *
+		 * getBeanFactoryPostProcessors()
+		 *   得到beanFactory的后置处理器
+		 *   容器初始化得失嘿嘿，getBeanFactoryPostProcessors() 是没有值的
 		 */
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 

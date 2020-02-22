@@ -31,4 +31,5 @@ rootProject.children.each {project ->
 }
 include 'a-spring-ioc'
 include 'a-spring-aop'
+include 'a-spring-tx'
 

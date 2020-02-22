@@ -42,6 +42,18 @@ public class TransactionManagementConfigurationSelector extends AdviceModeImport
 	 * {@code AspectJ(Jta)TransactionManagementConfiguration} for {@code PROXY}
 	 * and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()},
 	 * respectively.
+	 *
+	 * selectImports函数是在解析mainConfig 配置类的时候
+	 * 当解析到@import注解的时候，循环解析的时候去调用该函数的
+	 *
+	 * 1：AutoProxyRegistrar.class.getName() 注册了一个事务bean的后置处理器
+	 * 2：ProxyTransactionManagementConfiguration.class.getName() 注册事务管理配置器的相关几个配置类
+	 *    2.1：名字为 【org.springframework.transaction.config.internalTransactionAdvisor】
+	 *         类型为 【BeanFactoryTransactionAttributeSourceAdvisor】
+	 *    2.2：名字为 【transactionAttributeSource】
+	 *         类型为 【TransactionAttributeSource】
+	 *    2.3: 名字为 【transactionInterceptor】
+	 *         类型为 【TransactionInterceptor】
 	 */
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {

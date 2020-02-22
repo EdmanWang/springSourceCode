@@ -164,6 +164,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		TargetSource targetSource = this.advised.targetSource;
 		Object target = null;
 
+		/**
+		 * @edmanwang
+		 * 判断有些对象是不需要走代理的
+		 * 例如：调用equal方法和hashCode方法
+		 */
 		try {
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// The target does not implement the equals(Object) method itself.
@@ -185,6 +190,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 			Object retVal;
 
+			/**
+			 * @edmanwang
+			 * 是否暴露代理对象放在容器中
+			 */
 			if (this.advised.exposeProxy) {
 				// Make invocation available if necessary.
 				oldProxy = AopContext.setCurrentProxy(proxy);
@@ -197,6 +206,10 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			Class<?> targetClass = (target != null ? target.getClass() : null);
 
 			// Get the interception chain for this method.
+			/**
+			 * @edmanwang
+			 * 获取此方法的拦截器链
+			 */
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
 			// Check whether we have any advice. If we don't, we can fallback on direct

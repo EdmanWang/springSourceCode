@@ -358,6 +358,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		/**
 		 * @edmanwang
 		 * 判断这个对象是否有必要去创建代理对象
+		 * aop和事务都会走这个地方
 		 */
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {

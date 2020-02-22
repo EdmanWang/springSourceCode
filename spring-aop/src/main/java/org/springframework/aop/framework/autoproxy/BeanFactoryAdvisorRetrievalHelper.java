@@ -78,6 +78,8 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			 * @edmanwang
 			 * 从bean工厂中得到全部实现Advisor接口的bean名称
 			 * 注意：实现【Advisor】接口的一般是事务管理
+			 * 找打全部实现 【Advisor】 接口的增强器
+			 * 接着放入到缓存中
 			 */
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);

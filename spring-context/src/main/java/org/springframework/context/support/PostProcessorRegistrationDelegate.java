@@ -62,6 +62,11 @@ final class PostProcessorRegistrationDelegate {
 		 * @edmanwang
 		 * 这里的beanFactory 是BeanDefinitionRegistry 的一个实现
 		 * 所以会走这里的if
+		 *
+		 * ConfigurableListableBeanFactory是一个接口
+		 * 他只有一个实现类 即：【DefaultListableBeanFactory】
+		 *
+		 * DefaultListableBeanFactory 是 BeanDefinitionRegistry 的一个实现
 		 */
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
@@ -99,10 +104,17 @@ final class PostProcessorRegistrationDelegate {
 			 * 从容器中拿到以这个【BeanDefinitionRegistryPostProcessor】类型的后置处理器
 			 * 这个地方会拿到ConfigurationClassPostProcessor ，因为这个bean定义在前面已经注册到容器中了
 			 *    注意：ConfigurationClassPostProcessor 是实现了 BeanDefinitionRegistryPostProcessor
+			 *
+			 * 此处实现 【BeanDefinitionRegistryPostProcessor】 这个接口的只有 【ConfigurationClassPostProcessor】
+			 * 所以这里会找到这个类并且这个类在this()方法中已经进行了bean定义，放在了bean定义容器中
 			 */
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				/**
+				 * @edmanwang
+				 * ConfigurationClassPostProcessor 实现了 PriorityOrdered 这个接口
+				 */
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);

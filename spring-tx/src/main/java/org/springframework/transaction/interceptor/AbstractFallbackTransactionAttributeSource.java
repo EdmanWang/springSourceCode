@@ -109,6 +109,10 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 		else {
 			// We need to work it out.
+			/**
+			 * @edmanwang
+			 * 计算事务属性
+			 */
 			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
 			// Put it in the cache.
 			if (txAttr == null) {
@@ -158,12 +162,20 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
+		/**
+		 * @edmanwang
+		 * 首先尝试的是目标类中的方法。
+		 */
 		// First try is the method in the target class.
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
 			return txAttr;
 		}
 
+		/**
+		 * @edmanwang
+		 * 第二次尝试是目标类上的事务属性
+		 */
 		// Second try is the transaction attribute on the target class.
 		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
@@ -171,11 +183,20 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 
 		if (specificMethod != method) {
+			/**
+			 * @edmanwang
+			 * 回退是查看原始方法。
+			 * 也就是说查看父类中的方法
+			 */
 			// Fallback is to look at the original method.
 			txAttr = findTransactionAttribute(method);
 			if (txAttr != null) {
 				return txAttr;
 			}
+			/**
+			 * @edmanwang
+			 * 最后一个回退是原始方法的类
+			 */
 			// Last fallback is the class of the original method.
 			txAttr = findTransactionAttribute(method.getDeclaringClass());
 			if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {

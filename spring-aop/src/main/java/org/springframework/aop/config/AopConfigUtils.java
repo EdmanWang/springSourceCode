@@ -73,6 +73,11 @@ public abstract class AopConfigUtils {
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
 
+		/**
+		 * @edmanwang
+		 * 向容器中添加了一个 【InfrastructureAdvisorAutoProxyCreator】 类的bean定义器
+		 * 该类是作为事务的关键类，该类实现了beanPostProcessor 也就是说又bean的后置处理器功能
+		 */
 		return registerOrEscalateApcAsRequired(InfrastructureAdvisorAutoProxyCreator.class, registry, source);
 	}
 
@@ -120,6 +125,16 @@ public abstract class AopConfigUtils {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		/**
+		 * @edmanwang
+		 * 事务的自动代理创建器和aop的自动代理创建器 的beanName是同一个
+		 * 并且aop的自动代理创建器比事务的自动创建代理器要高
+		 *
+		 * 所以这里会出现两种情况
+		 * 1：如果即开启了事务也开启aop的话
+		 *    那么aop的bean定义器会覆盖事务的bean定义
+		 * 2：如果只开启了事务的话，那么bean工厂找那个存在事务的bean定义器
+		 */
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
@@ -134,8 +149,14 @@ public abstract class AopConfigUtils {
 
 		/**
 		 * @edmanwang
-		 * 向容器中添加了一个名字为 【org.springframework.aop.config.internalAutoProxyCreator】
-		 * 类型为 【AnnotationAwareAspectJAutoProxyCreator】
+		 *
+		 * 如果是aop创建则
+		 *        向容器中添加了一个名字为 【org.springframework.aop.config.internalAutoProxyCreator】
+		 *        类型为 【AnnotationAwareAspectJAutoProxyCreator】
+		 *
+		 * 如果是事务创建则
+		 *        向容器中添加了一个名字为 【org.springframework.aop.config.internalAutoProxyCreator】
+		 *        类型为 【InfrastructureAdvisorAutoProxyCreator】
 		 * 的后置处理器
 		 */
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);

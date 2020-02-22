@@ -596,6 +596,14 @@ class ConfigurationClassParser {
 		}
 	}
 
+	/**
+	 * 从这个类的解析方式来看
+	 * @importSelector 是作为@import 的一个子注解
+	 * @param configClass
+	 * @param currentSourceClass
+	 * @param importCandidates
+	 * @param checkForCircularImports
+	 */
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, boolean checkForCircularImports) {
 
@@ -613,10 +621,15 @@ class ConfigurationClassParser {
 					/**
 					 * @edmanwang
 					 * 解析@ImportSelector注解
+					 * 找到 实现 ImportSelector 的皆苦的实现类
 					 */
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
+						/**
+						 * @edmanwang
+						 * 得到实例
+						 */
 						ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
 						ParserStrategyUtils.invokeAwareMethods(
 								selector, this.environment, this.resourceLoader, this.registry);
@@ -627,9 +640,15 @@ class ConfigurationClassParser {
 							/**
 							 * @edmanwang
 							 * 调用selectImports方法
+							 *
+							 * 调用重写的selectImports 方法
 							 */
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
+							/**
+							 * @edmanwang
+							 * 这里又采用递归的模式去解析子注解
+							 */
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
@@ -650,16 +669,17 @@ class ConfigurationClassParser {
 					else {
 						/**
 						 * @edmanwang
-						 * 解析@ImportB注解
+						 * 候选类不是ImportSelector或ImportBeanDefinitionRegistrar
+						 * 将其作为@Configuration类处理
 						 */
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
-						/**
-						 * @edmanwang
-						 * 这个地方只是记录了一下@import注解中添加的需要解析的类
-						 */
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						/**
+						 * @edmanwang
+						 * 重新解析相关的子注解类
+						 */
 						processConfigurationClass(candidate.asConfigClass(configClass));
 					}
 				}

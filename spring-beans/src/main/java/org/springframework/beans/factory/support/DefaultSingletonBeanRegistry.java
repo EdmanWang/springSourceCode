@@ -149,6 +149,19 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(singletonFactory, "Singleton factory must not be null");
+		/**
+		 * @edmanwang
+		 * spring常常说的单例换存池指的就是 singletonObjects 他的数据结构是一个 ConcurrentHashMap
+		 *
+		 * 解决循环依赖 spring用到了多级缓存
+		 * 1：第一级缓存指的是 单例缓存池 也就是 【singletonObjects】
+		 * 2：第二级缓存指的是 早期单例缓存池 也就是 【earlySingletonObjects】 其数据结构是 【HashMap】，
+		 *
+		 *
+		 * 3：第三级缓存指的是 【singletonFactories】其数据结构是 【HashMap】
+		 *    放在【singletonFactories】指的是bean对象已经完成了实例化，但是还没有完成初始化。并不是一个完整的bean对象，
+		 *    换句话说也就是没有经历完bean的完整生命周期
+		 */
 		synchronized (this.singletonObjects) {
 			if (!this.singletonObjects.containsKey(beanName)) {
 				this.singletonFactories.put(beanName, singletonFactory);

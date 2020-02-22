@@ -240,6 +240,16 @@ public abstract class AnnotationConfigUtils {
 		return beanDefs;
 	}
 
+	/**
+	 * @edmanwang
+	 *
+	 * 为 BeanDefinition 添加后置处理器
+	 *
+	 * @param registry
+	 * @param definition
+	 * @param beanName
+	 * @return
+	 */
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 

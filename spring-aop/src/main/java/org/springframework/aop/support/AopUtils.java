@@ -226,6 +226,10 @@ public abstract class AopUtils {
 			return false;
 		}
 
+		/**
+		 * @edmanwang
+		 * 创建一个方法匹配器
+		 */
 		MethodMatcher methodMatcher = pc.getMethodMatcher();
 		if (methodMatcher == MethodMatcher.TRUE) {
 			// No need to iterate the methods if we're matching any method anyway...
@@ -238,11 +242,25 @@ public abstract class AopUtils {
 		}
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
+		/**
+		 * @edmanwang
+		 * 代理对象不是目标对象
+		 * 则记录目标对象
+		 */
 		if (!Proxy.isProxyClass(targetClass)) {
 			classes.add(ClassUtils.getUserClass(targetClass));
 		}
+		/**
+		 * @edmanwang
+		 * 得到目标对象所实现的接口类
+		 */
 		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 
+		/**
+		 * @edmanwang
+		 * 遍历目标类和接口类
+		 * 找到每一个类所定义的方法
+		 */
 		for (Class<?> clazz : classes) {
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {

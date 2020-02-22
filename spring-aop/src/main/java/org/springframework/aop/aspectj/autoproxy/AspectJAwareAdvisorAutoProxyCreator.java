@@ -85,16 +85,6 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		}
 	}
 
-	/**
-	 * Adds an {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
-	 * These additional advices are needed when using AspectJ expression pointcuts
-	 * and when using AspectJ-style advice.
-	 */
-	@Override
-	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
-		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
-	}
-
 	@Override
 	protected boolean shouldSkip(Class<?> beanClass, String beanName) {
 		// TODO: Consider optimization by caching the list of the aspect names
@@ -114,6 +104,16 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			}
 		}
 		return super.shouldSkip(beanClass, beanName);
+	}
+
+	/**
+	 * Adds an {@link ExposeInvocationInterceptor} to the beginning of the advice chain.
+	 * These additional advices are needed when using AspectJ expression pointcuts
+	 * and when using AspectJ-style advice.
+	 */
+	@Override
+	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
+		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 
 
