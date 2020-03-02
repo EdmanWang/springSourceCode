@@ -489,6 +489,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
+	 *
+	 * @edmanwang
+	 * 调用这个方法的源头在abstractApplicationContext类中的refresh() 函数
+	 * 中 的finishRefresh();
+	 *
+	 * 采用的方式是通过发布事件，使用的设计模式是观察者模式
 	 */
 	@Override
 	protected void onRefresh(ApplicationContext context) {
@@ -498,6 +504,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the strategy objects that this servlet uses.
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
+	 *
+	 * @edmanwang
+	 * 加载各种组件
+	 * 其中包括 HandlerMapping，HandlerAdapter，ViewResolver 等等
 	 */
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
@@ -589,6 +599,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Initialize the HandlerMappings used by this class.
 	 * <p>If no HandlerMapping beans are defined in the BeanFactory for this namespace,
 	 * we default to BeanNameUrlHandlerMapping.
+	 *
+	 * @edmanwang
+	 * 从容器中加载全部的HandlerMapping
 	 */
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
@@ -905,6 +918,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Exposes the DispatcherServlet-specific request attributes and delegates to {@link #doDispatch}
 	 * for the actual dispatching.
+	 *
+	 * @edmanwang
+	 * 这里是webMVC主要的调度中心
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -940,6 +956,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		try {
+			/**
+			 * @edmanwang
+			 * 实际上做事的是这个函数
+			 */
 			doDispatch(request, response);
 		}
 		finally {
@@ -1013,6 +1033,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
+				/**
+				 * @edmanwang
+				 * 确定当前请求的处理程序。
+				 * 也就是说根据请求的url来确定handleMapper
+				 */
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1020,6 +1045,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				// Determine handler adapter for the current request.
+				/**
+				 * @edmanwang
+				 * 确定当前请求的处理程序适配器
+				 * 也就是说通过适配器模式来得到能够支持该handleMapper 的HandlerAdapter
+				 */
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
 				// Process last-modified header, if supported by the handler.
@@ -1032,11 +1062,23 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
+				/**
+				 * @edmanwang
+				 * 这里是执行项目中定义的拦截器中的前置处理函数
+				 * 即：【preHandle（）】
+				 * 注意：这里使用了一个for循环去处理全部的拦截器。
+				 * 表示工程中全部拦截器的前置处理函数都会一个一个执行完毕。
+				 */
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
+				/**
+				 * @edmanwang
+				 * 执行目标方法
+				 * 返回modeAndView
+				 */
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1044,6 +1086,13 @@ public class DispatcherServlet extends FrameworkServlet {
 				}
 
 				applyDefaultViewName(processedRequest, mv);
+				/**
+				 * @edmanwang
+				 * 这里是执行项目中定义的拦截器中的后置处理函数
+				 * 即：【postHandle（）】
+				 * 注意：这里使用了一个for循环去处理全部的拦截器。
+				 * 表示工程中全部拦截器的前置处理函数都会一个一个执行完毕。
+				 */
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -1054,6 +1103,10 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			/**
+			 * @edmanwang
+			 * 处理modelAndView,
+			 */
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1228,8 +1281,19 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		/**
+		 * @edmanwang
+		 * 为什么这里的this.handlerMappings 不等于 null
+		 * 这是因为在初始化web容器的时候，在调用refresh 函数中的最后一个方法
+		 * 中完成了对该集合的赋值。
+		 */
 		if (this.handlerMappings != null) {
+
 			for (HandlerMapping mapping : this.handlerMappings) {
+				/**
+				 * @edmanwang
+				 * 这里做的是根据请求的url路径来得到合适的handleChain
+				 */
 				HandlerExecutionChain handler = mapping.getHandler(request);
 				if (handler != null) {
 					return handler;

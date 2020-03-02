@@ -527,6 +527,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
+			/**
+			 * @edmanwang
+			 * 初始化web上下文环境
+			 */
 			this.webApplicationContext = initWebApplicationContext();
 			initFrameworkServlet();
 		}
@@ -588,6 +592,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one
+			/**
+			 * @edmanwang
+			 * 当没有上下文环境的时候，创建一个上下文环境
+			 */
 			wac = createWebApplicationContext(rootContext);
 		}
 
@@ -665,6 +673,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (configLocation != null) {
 			wac.setConfigLocation(configLocation);
 		}
+		/**
+		 * @edmanwang
+		 * 为容器配置相关数据，并完成容器的初始化
+		 */
 		configureAndRefreshWebApplicationContext(wac);
 
 		return wac;
@@ -699,6 +711,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		postProcessWebApplicationContext(wac);
 		applyInitializers(wac);
+		/**
+		 * @edmanwang
+		 * 这里会调到abstractApplicationContext 中的refresh 函数
+		 * 完成容器额初始化
+		 */
 		wac.refresh();
 	}
 
